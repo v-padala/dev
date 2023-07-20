@@ -1,0 +1,6 @@
+
+[webservers]
+192.168.0.21 ansible_user=root ansible_connection=ssh ansible_ssh_pass=goldfish@123
+192.168.0.22 ansible_user=root ansible_connection=ssh ansible_ssh_pass=goldfish@123
+[loadbalancer]
+192.168.0.20 ansible_user=root ansible_connection=ssh ansible_ssh_pass=goldfish@123

@@ -1,0 +1,64 @@
+module "network" {
+  source           = "./modules/network/"
+  project_id       = var.project_id
+  network_name     = var.network_name
+  subnet1_name     = var.subnet1_name
+  region_1         = var.region_1
+  subnet1_cidr     = var.subnet1_cidr
+  subnet2_name     = var.subnet2_name
+  region_2         = var.region_2
+  subnet2_cidr     = var.subnet2_cidr
+  private_ip_google_access = var.private_ip_google_access
+  network-prefix           = var.network-prefix
+}
+
+module "gcp_sql_db_instance" {
+  # var required
+  source                          = "./modules/db"
+  sql_instance_name               = "${var.sql_instance_name}"
+  database_version                = "${var.database_version}"
+  region                          = "${var.region}"
+  sql_primary_zone               = "${var.sql_primary_zone}"
+  sql_secondary_zone               = "${var.sql_secondary_zone}"
+  project_id                      = "${var.project_id}"
+  db_name                         = "${var.sql_default_db_name}"
+  disk_size                       = "${var.sql_db_disk_size}"
+  user_name                       = "${var.sql_default_user_name}"
+  user_password                   = "${var.sql_default_user_password}"
+  network_name                    = "projects/${var.project_id}/global/networks/${var.network_name}"
+  maintenance_window_day          = "${var.maintenance_window_day}"
+  maintenance_window_hour         = "${var.maintenance_window_hour}"
+  maintenance_window_update_track = "${var.maintenance_window_update_track}"
+  db_charset                      = "${var.db_charset}"
+  db_collation                    = "${var.db_collation}"
+  activation_policy               = "${var.activation_policy}"
+  availability_type               = "${var.availability_type}"
+  disk_type                       = "${var.disk_type}"
+  pricing_plan                    = "${var.pricing_plan}"
+  tier                            = "${var.tier}"
+backup_configuration = {
+    enabled                        = true
+    start_time                     = "20:55"
+    location                       = null
+    point_in_time_recovery_enabled = true
+    transaction_log_retention_days = null
+    retained_backups               = 365
+    retention_unit                 = "COUNT"
+  }
+depends_on = [module.network]
+}
+module "compute_instance" {
+  count                = 1
+  source               = "./modules/compute"
+  name                 = var.instance_Name
+  project              = var.project_id
+  zone                 = var.zone
+  tags                 = ["allow-ssh"]
+  machine_type         = var.host_machine_type
+  boot_disk_image      = var.docker_host_image
+  boot_disk_size       = var.boot_disk_size
+  subnetwork           = var.subnet_uri
+  service_account_email = var.serviceemail
+  service_account_scopes = ["cloud-platform"]
+  depends_on = [module.gcp_sql_db_instance]
+}

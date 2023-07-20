@@ -1,0 +1,13 @@
+---
+  - name: Configure Haproxy
+    hosts: loadbalancer
+    become: yes
+    become_user: root
+    roles:
+      - haproxy
+  - name: install Webserver
+    hosts: webservers
+    become: yes
+    become_user: root
+    roles:
+      - webserver   

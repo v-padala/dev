@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  web-server-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8070:80
+    networks:
+      - backend
+
+  web-server-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 80
+    networks:
+      - backend
+
+  load-balancer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 80
+    depends_on:
+      - web-server-1
+      - web-server-2
+    networks:
+      - backend
+
+networks:
+  backend:

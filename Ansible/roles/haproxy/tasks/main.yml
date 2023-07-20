@@ -1,0 +1,19 @@
+---
+- name: setup webserver
+  hosts: loadbalancer
+  become: true
+  tasks:
+    - name: "install haproxy"
+      package:
+        name: haproxy
+        state: present
+    - name: " configure haproxy.cfg file"
+      template:
+        src: "{{ item.filename }}"
+        dest: "/etc/haproxy/{{ item.filename | basename | regex_replace('.j2', '') }}"
+      with_items:
+        - {filename: '{{ haproxycfg_filename }}'}
+    - name: " haproxy service start"
+      service:
+        name: haproxy
+        state: restarted
